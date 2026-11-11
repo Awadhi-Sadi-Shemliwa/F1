@@ -1,0 +1,253 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>What is a grid place worth in Formula 1?</title>
+<style>
+/* Shared look for the concept animations. One file, no dependencies. */
+:root{
+  --bg:#f6f5f2; --surface:#fcfcfb; --ink:#0b0b0b; --ink2:#52514e; --muted:#8a8982; --line:#dedcd5;
+  --blue:#2a78d6; --orange:#eb6834; --aqua:#1baf7a; --yellow:#eda100; --red:#d93a3a; --violet:#6250d6;
+  --blue-soft:#dbe8f9; --orange-soft:#fbe3d8; --aqua-soft:#d6f1e6; --yellow-soft:#fbecc4; --red-soft:#f9dcdc; --grey-soft:#ebe9e3;
+  --code-bg:#17181c; --code-ink:#e6e4dd; --code-dim:#8d8c86; --code-hl:#2c3a52;
+  --r:10px; --mono:ui-monospace,"SF Mono",Menlo,Consolas,monospace;
+}
+@media (prefers-color-scheme:dark){:root{
+  --bg:#121211; --surface:#1a1a19; --ink:#f0efec; --ink2:#c3c2b7; --muted:#8a8982; --line:#33322e;
+  --blue:#3987e5; --orange:#d95926; --aqua:#199e70; --yellow:#c98500; --red:#e66767; --violet:#9085e9;
+  --blue-soft:#1d2f47; --orange-soft:#44251a; --aqua-soft:#173a2e; --yellow-soft:#3d3110; --red-soft:#472020; --grey-soft:#262624;
+}}
+*{box-sizing:border-box}
+html{-webkit-text-size-adjust:100%}
+body{margin:0;background:var(--bg);color:var(--ink);font:16px/1.5 system-ui,-apple-system,"Segoe UI",Roboto,sans-serif}
+a{color:var(--blue)}
+header.top{padding:18px 20px 6px;max-width:1180px;margin:0 auto}
+header.top .crumbs{font-size:13px;color:var(--ink2);display:flex;flex-wrap:wrap;gap:4px 12px}
+header.top .crumbs a{text-decoration:none;white-space:nowrap}
+header.top h1{margin:10px 0 4px;font-size:clamp(24px,4vw,34px);line-height:1.15;letter-spacing:-.02em}
+header.top p.lead{margin:0;color:var(--ink2);max-width:70ch}
+main{max-width:1180px;margin:0 auto;padding:8px 20px 60px}
+section.lesson{background:var(--surface);border:1px solid var(--line);border-radius:14px;padding:18px;margin-top:22px}
+section.lesson>h2{margin:0 0 2px;font-size:20px;letter-spacing:-.01em}
+section.lesson>p.sub{margin:0 0 14px;color:var(--ink2);font-size:14.5px}
+.grid{display:grid;grid-template-columns:minmax(0,5fr) minmax(0,6fr);gap:18px;align-items:start}
+@media (max-width:860px){.grid{grid-template-columns:minmax(0,1fr)}}
+pre.code{margin:0;background:var(--code-bg);color:var(--code-ink);border-radius:var(--r);padding:10px 0;font:13px/1.65 var(--mono);overflow-x:auto;counter-reset:ln}
+pre.code span.l{display:block;padding:0 12px 0 0;white-space:pre;border-left:3px solid transparent;transition:background .25s,border-color .25s}
+pre.code span.l::before{counter-increment:ln;content:counter(ln);display:inline-block;width:30px;text-align:right;margin-right:12px;color:var(--code-dim)}
+pre.code span.l.on{background:var(--code-hl);border-left-color:var(--blue)}
+pre.code .c{color:var(--code-dim)}
+.say{margin-top:12px;min-height:118px;font-size:15.5px}
+.say b{font-weight:650}
+.say code,.note code,td code,p code,li code{font:13px var(--mono);background:var(--grey-soft);padding:1px 5px;border-radius:5px;overflow-wrap:anywhere}
+.ctl{display:flex;align-items:center;gap:8px;margin-top:10px;flex-wrap:wrap}
+button{font:inherit;font-size:14px;border:1px solid var(--line);background:var(--surface);color:var(--ink);padding:7px 14px;border-radius:8px;cursor:pointer}
+button:hover{border-color:var(--ink2)}
+button.pri{background:var(--blue);border-color:var(--blue);color:#fff}
+button:disabled{opacity:.4;cursor:default}
+button.on{background:var(--ink);color:var(--surface);border-color:var(--ink)}
+.dots{display:flex;gap:5px;flex-wrap:wrap;margin-left:4px}
+.dots i{width:9px;height:9px;border-radius:50%;background:var(--line);cursor:pointer;transition:background .2s,transform .2s}
+.dots i.on{background:var(--blue);transform:scale(1.25)}
+.stepno{font-size:12.5px;color:var(--muted);margin-left:auto}
+.stage{position:relative;min-height:330px;border:1px dashed var(--line);border-radius:var(--r);padding:14px;overflow:hidden}
+.stage h4{margin:0 0 8px;font-size:12.5px;font-weight:600;color:var(--ink2);text-transform:uppercase;letter-spacing:.05em}
+/* data tables */
+table.df{border-collapse:separate;border-spacing:3px;font:13px/1.2 var(--mono)}
+table.df th{font-weight:600;color:var(--ink2);padding:4px 9px;text-align:left;font-size:12px}
+table.df td{padding:6px 9px;border-radius:6px;background:var(--grey-soft);white-space:pre;transition:background .45s,color .45s,opacity .45s,transform .45s}
+table.df td.idx{background:transparent;color:var(--muted);font-size:12px}
+td.num,.chip.num{background:var(--blue-soft)!important}
+td.nan,.chip.nan{background:var(--yellow-soft)!important;color:var(--ink)}
+td.bad,.chip.bad{background:var(--red-soft)!important}
+td.ok,.chip.ok{background:var(--aqua-soft)!important}
+td.chg{background:var(--orange-soft)!important}
+td.gone{opacity:.12}
+td.hide,th.hide{display:none}
+.tag{display:inline-block;font:12px var(--mono);padding:2px 8px;border-radius:20px;background:var(--grey-soft);color:var(--ink2);margin:6px 6px 0 0;transition:background .3s}
+.tag.num{background:var(--blue-soft)} .tag.bad{background:var(--red-soft)} .tag.nan{background:var(--yellow-soft)} .tag.ok{background:var(--aqua-soft)}
+.err{font:12.5px/1.5 var(--mono);background:var(--red-soft);border-left:3px solid var(--red);padding:8px 10px;border-radius:6px;margin-top:10px;opacity:0;transform:translateY(6px);transition:all .4s}
+.err.show{opacity:1;transform:none}
+.note{border-left:3px solid var(--blue);background:var(--blue-soft);padding:10px 12px;border-radius:6px;font-size:14.5px;margin-top:12px}
+.note.warn{border-color:var(--orange);background:var(--orange-soft)}
+.note.good{border-color:var(--aqua);background:var(--aqua-soft)}
+.fade{opacity:0;transform:translateY(8px);transition:opacity .5s,transform .5s;pointer-events:none}
+.fade.show{opacity:1;transform:none;pointer-events:auto}
+.rules{display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:12px;margin-top:16px}
+.rules>div{border:1px solid var(--line);border-radius:var(--r);padding:12px 14px;font-size:14.5px;background:var(--surface)}
+.rules h3{margin:0 0 6px;font-size:15px}
+.rules ul{margin:0;padding-left:18px}
+table.plain{border-collapse:collapse;width:100%;font-size:14px;margin-top:8px}
+table.plain th,table.plain td{text-align:left;padding:7px 10px;border-bottom:1px solid var(--line);vertical-align:top}
+table.plain th{font-size:12.5px;color:var(--ink2);font-weight:600}
+.scroll{overflow-x:auto}
+svg text{fill:var(--ink2);font:12px system-ui,sans-serif}
+.legend{display:flex;gap:14px;flex-wrap:wrap;font-size:13px;color:var(--ink2);margin:8px 0}
+.legend i{display:inline-block;width:11px;height:11px;border-radius:3px;margin-right:5px;vertical-align:-1px}
+footer{max-width:1180px;margin:0 auto;padding:0 20px 40px;color:var(--muted);font-size:13px}
+@media (prefers-reduced-motion:reduce){*{transition-duration:.01s!important}}
+
+.panel h4{margin-top:14px}
+.rules code,h1 code,h2 code{font:.86em var(--mono);background:var(--grey-soft);padding:1px 5px;border-radius:5px}
+code{overflow-wrap:anywhere}
+.rules>div{min-width:0}
+
+.stage{min-height:400px}
+.vz h4{margin-bottom:12px}
+.fn{display:grid;grid-template-columns:minmax(120px,210px) 1fr;gap:6px 12px;align-items:center;font-size:13.5px;margin-bottom:10px}
+.fn .b{height:26px;background:var(--grey-soft);border-radius:6px;position:relative;overflow:hidden}
+.fn .b i{position:absolute;left:0;top:0;bottom:0;background:var(--blue);border-radius:6px;width:0;transition:width 1s cubic-bezier(.3,.8,.3,1)}
+.fn .b span{position:absolute;left:8px;top:4px;font:600 12.5px var(--mono);color:#fff;mix-blend-mode:normal;text-shadow:0 0 3px rgba(0,0,0,.45)}
+.fn small{grid-column:2;color:var(--ink2);margin-top:-4px}
+.hb{display:grid;grid-template-columns:minmax(110px,44%) 1fr 58px;gap:8px;align-items:center;font-size:13px;margin:7px 0}
+.hb div{height:18px;background:var(--grey-soft);border-radius:5px;overflow:hidden}.hb div i{display:block;height:100%;width:0;background:var(--blue);border-radius:5px;transition:width 1s cubic-bezier(.3,.8,.3,1)}
+.hb.hi div i{background:var(--orange)}.hb.lo div i{background:var(--muted)}.hb b{font:600 12.5px var(--mono);text-align:right}
+.vb{display:flex;align-items:flex-end;gap:6px;height:230px;border-bottom:2px solid var(--line);padding-top:26px}
+.vb .c{flex:1;display:flex;flex-direction:column;justify-content:flex-end;align-items:center;height:100%;min-width:0}
+.vb .c i{display:block;width:100%;max-width:64px;background:var(--blue);border-radius:4px 4px 0 0;height:0;transition:height 1s cubic-bezier(.3,.8,.3,1)}
+.vb .c.hi i{background:var(--orange)}.vb .c.s2 i{background:var(--orange)}
+.vb .c em{font:normal 11.5px var(--mono);color:var(--ink2);margin-bottom:3px;white-space:nowrap}
+.vx{display:flex;gap:6px;font-size:11.5px;color:var(--ink2);margin-top:5px}.vx span{flex:1;text-align:center;min-width:0;overflow-wrap:anywhere;line-height:1.2}
+.cap{font-size:12.5px;color:var(--ink2);margin-top:8px;text-align:center}
+.sp{display:flex;height:54px;border-radius:8px;overflow:hidden;margin:18px 0 8px;font:600 13px system-ui;color:#fff}
+.sp div{display:flex;align-items:center;justify-content:center;transition:flex 1s;flex:0 0 0;white-space:nowrap;overflow:hidden}
+.kv{display:grid;grid-template-columns:repeat(auto-fit,minmax(120px,1fr));gap:8px;margin:12px 0}.kv div{border:1px solid var(--line);border-radius:8px;padding:8px 10px}
+.kv b{display:block;font-size:21px;letter-spacing:-.01em}.kv span{font-size:12px;color:var(--ink2)}
+.big{font-size:clamp(20px,3.2vw,28px);font-weight:700;letter-spacing:-.015em;line-height:1.25;margin:26px 6px}
+.th canvas{width:100%;height:210px;display:block}.th input[type=range]{width:100%;accent-color:var(--orange)}
+.th label{font-size:13px;color:var(--ink2);display:flex;gap:8px;align-items:center;flex-wrap:wrap;margin-top:6px}.th input[type=number]{width:64px;font:inherit;padding:3px 6px;border:1px solid var(--line);border-radius:6px;background:var(--surface);color:var(--ink)}
+table.t{border-collapse:collapse;width:100%;font-size:13.5px}table.t th,table.t td{padding:6px 8px;border-bottom:1px solid var(--line);text-align:right}table.t th:first-child,table.t td:first-child{text-align:left}table.t th{font-size:12px;color:var(--ink2)}
+td.pos{color:var(--orange);font-weight:600}td.neg{color:var(--blue);font-weight:600}
+</style></head>
+<body>
+<header class="top"><div style="font-size:13px;color:var(--ink2)">Formula 1 · project walkthrough</div><h1>What is a grid place worth in Formula 1?</h1><p class="lead">5,069 race starts from 2014 to 2025: predicting a points finish before the lights go out, and pricing a grid penalty.</p></header>
+<main><section class="lesson" id="S"></section>
+<section class="lesson"><h2>Sources</h2><p class="sub" style="margin:0">Data: F1DB (github.com/f1db/f1db), CC BY 4.0. Full reference list in <code>paper/paper.md</code>.</p></section></main>
+<footer>Every number on this page is read from <code>results/metrics.json</code>, which <code>src/analysis.py</code> writes. Change the analysis, re-run, rebuild, and the page follows.</footer>
+<script>
+/* Tiny step-through engine shared by every lesson page. No libraries.
+   A lesson = code lines + steps. Each step highlights code, says something, and redraws the stage.
+   draw() functions are idempotent (they set the full state), so Back works as well as Next. */
+const $ = (s, r = document) => r.querySelector(s);
+const $$ = (s, r = document) => [...r.querySelectorAll(s)];
+function h(tag, attrs = {}, ...kids) {
+  const e = document.createElement(tag);
+  for (const [k, v] of Object.entries(attrs)) {
+    if (k === 'class') e.className = v; else if (k === 'html') e.innerHTML = v;
+    else if (k.startsWith('on')) e.addEventListener(k.slice(2), v); else e.setAttribute(k, v);
+  }
+  for (const k of kids.flat()) e.append(k?.nodeType ? k : document.createTextNode(k ?? ''));
+  return e;
+}
+function svg(tag, attrs = {}, ...kids) {
+  const e = document.createElementNS('http://www.w3.org/2000/svg', tag);
+  for (const [k, v] of Object.entries(attrs)) e.setAttribute(k, v);
+  for (const k of kids.flat()) e.append(k?.nodeType ? k : document.createTextNode(k ?? ''));
+  return e;
+}
+const NAV = [['index.html', 'Map'], ['01_text_to_numbers.html', '1 Types'], ['02_reindex_get_dummies.html', '2 Reindex + dummies'],
+  ['03_missing_values.html', '3 Missing values'], ['04_split_and_scale.html', '4 Split + scale'], ['05_model_picker.html', '5 Models'],
+  ['06_sklearn_vs_statsmodels.html', '6 sklearn vs statsmodels'], ['07_reading_charts.html', '7 Reading charts']];
+function nav() {
+  const here = location.pathname.split('/').pop() || 'index.html';
+  const c = $('.crumbs'); if (!c) return;
+  NAV.forEach(([f, t]) => c.append(h('a', { href: f, style: f === here ? 'font-weight:700;color:var(--ink)' : '' }, t)));
+}
+document.addEventListener('DOMContentLoaded', nav);
+
+/* Lesson({mount, title, sub, code:[...], setup(stage)->refs, steps:[{line, say, draw(refs)}]}) */
+function Lesson(o) {
+  const root = typeof o.mount === 'string' ? $(o.mount) : o.mount;
+  const codeEl = h('pre', { class: 'code' });
+  (o.code || []).forEach(t => codeEl.append(h('span', { class: 'l', html: t.replace(/(#.*)$/, '<span class="c">$1</span>') || ' ' })));
+  const say = h('div', { class: 'say' }), stage = h('div', { class: 'stage' });
+  const dots = h('div', { class: 'dots' }), no = h('span', { class: 'stepno' });
+  const prev = h('button', { onclick: () => go(i - 1) }, '◀ Back');
+  const next = h('button', { class: 'pri', onclick: () => go(i + 1) }, 'Next ▶');
+  const play = h('button', { onclick: toggle }, '▶ Play');
+  root.append(h('h2', {}, o.title), h('p', { class: 'sub', html: o.sub || '' }),
+    h('div', { class: 'grid' }, h('div', {}, o.code ? codeEl : '', say, h('div', { class: 'ctl' }, prev, next, play, dots, no)), stage));
+  const refs = o.setup ? o.setup(stage) : {};
+  let i = 0, timer = null;
+  o.steps.forEach((_, k) => dots.append(h('i', { onclick: () => go(k) })));
+  function go(k) {
+    i = Math.max(0, Math.min(o.steps.length - 1, k));
+    const s = o.steps[i], lines = s.line == null ? [] : [].concat(s.line);
+    $$('.l', codeEl).forEach((l, n) => l.classList.toggle('on', lines.includes(n + 1)));
+    say.innerHTML = s.say; s.draw && s.draw(refs, stage);
+    $$('i', dots).forEach((d, n) => d.classList.toggle('on', n === i));
+    no.textContent = `step ${i + 1} of ${o.steps.length}`;
+    prev.disabled = i === 0; next.disabled = i === o.steps.length - 1;
+    if (i === o.steps.length - 1 && timer) toggle();
+  }
+  function toggle() {
+    if (timer) { clearInterval(timer); timer = null; play.textContent = '▶ Play'; }
+    else { if (i === o.steps.length - 1) go(0); timer = setInterval(() => go(i + 1), o.pace || 3200); play.textContent = '❚❚ Pause'; }
+  }
+  go(0);
+  return { go, refs };
+}
+
+/* DataFrame-looking table. cols: ['name',...]; rows: [[...],...]; index: optional labels. */
+function DF(parent, cols, rows, index) {
+  const t = h('table', { class: 'df' }), head = h('tr', {});
+  if (index) head.append(h('th', {}, ''));
+  cols.forEach(c => head.append(h('th', {}, c)));
+  t.append(head);
+  const cells = rows.map((r, ri) => {
+    const tr = h('tr', {}); if (index) tr.append(h('td', { class: 'idx' }, index[ri]));
+    const cs = r.map(v => { const td = h('td', {}, String(v)); tr.append(td); return td; });
+    t.append(tr); return cs;
+  });
+  parent.append(t);
+  const api = {
+    el: t, cells, ths: $$('th', head).slice(index ? 1 : 0), idx: index ? $$('td.idx', t) : [],
+    set(r, c, v, cls) { const td = cells[r][c]; td.textContent = v; td.className = cls || ''; return api; },
+    col(c, vals, cls) { vals.forEach((v, r) => api.set(r, c, v, typeof cls === 'function' ? cls(v, r) : cls)); return api; },
+    showCol(c, on) { api.ths[c].classList.toggle('hide', !on); cells.forEach(r => r[c].classList.toggle('hide', !on)); return api; }
+  };
+  return api;
+}
+const show = (el, on = true) => el.classList.toggle('show', on);
+/* tiny deterministic random so "random_state=42" really is repeatable */
+function rng(seed) { let s = seed >>> 0; return () => ((s = (s * 1664525 + 1013904223) >>> 0) / 4294967296); }
+function shuffled(n, seed) { const r = rng(seed), a = [...Array(n).keys()]; for (let i = n - 1; i > 0; i--) { const j = Math.floor(r() * (i + 1)); [a[i], a[j]] = [a[j], a[i]]; } return a; }
+const mean = a => a.reduce((x, y) => x + y, 0) / a.length;
+const sd = a => { const m = mean(a); return Math.sqrt(mean(a.map(x => (x - m) ** 2))); };
+const fmt = (x, d = 2) => Number(x).toFixed(d);
+
+const STORY = {"steps": [{"h": "The question", "say": "Each F1 driver has a limited allocation of power-unit parts per season. Fit an extra one and you take a grid penalty at that race, and the team chooses which race. So every team needs a price: <b>what does a lost grid place cost, and is it the same for every car?</b>", "viz": {"kind": "text", "text": "What is a grid place worth, and who can afford a penalty?", "kv": [["252", "races, 2014 to 2025"], ["5,069", "race starts"], ["14.4%", "of starts ended in retirement"]]}}, {"h": "Clean: the text codes are the outcome", "say": "Finishing position is stored as text: <code>1</code>…<code>22</code>, but also <code>DNF</code>, <code>DNS</code>, <code>DSQ</code>. <code>pd.to_numeric(errors=\"coerce\")</code> turns 768 cells (15%) into NaN without a word. If you then <code>dropna()</code>, every retirement disappears and each grid slot looks safer than it is. A retirement is a <b>result</b>: zero points. Only the 39 cars that never started are removed.", "code": "pos = pd.to_numeric(df[\"positionText\"], errors=\"coerce\")\nprint(pos.isna().sum())                      # 768: look before you drop\ndf[\"points_finish\"] = (pos <= 10).astype(int)   # NaN <= 10 is False = no points\ndf[\"points\"] = df[\"points\"].fillna(0)            # empty means zero, by design", "viz": {"kind": "funnel", "rows": [{"label": "Raw race results, 1950 onwards", "rows": 27731, "note": "one row = one car entered in one race"}, {"label": "Seasons 2014-2025", "rows": 5108, "note": "one rule set for points (top 10) and one engine formula"}, {"label": "Cars that started", "rows": 5069, "note": "39 did-not-start entries removed (no race to predict)"}, {"label": "With a usable grid position", "rows": 5069, "note": "pit-lane starts kept as last+1 with a flag"}], "note": "128 pit-lane starts have no grid number. Left as NaN, an imputer would put them mid-grid. They are set to last place + 1 and flagged."}}, {"h": "Explore: the grid", "say": "<b>Pattern:</b> from pole, 91% of starts finish in the points; from 10th, 55%; from 11th, 45%; from 20th, 13%. <b>Exception:</b> the top four are almost flat, then it falls fastest between 7th and 12th. <b>Doubt:</b> fast cars qualify at the front, so this mixes the value of the grid slot with the speed of the car. The model has to separate them.", "viz": {"kind": "bars", "title": "% of starts that finished in the points, by grid position", "labels": ["1", "2", "3", "4", "5", "6", "7", "8", "9", "10", "11", "12", "13", "14", "15", "16", "17", "18", "19", "20"], "values": [0.9123505976095617, 0.9036144578313253, 0.9043824701195219, 0.873015873015873, 0.7777777777777778, 0.7896825396825397, 0.7298387096774194, 0.6414342629482072, 0.5952380952380952, 0.5483870967741935, 0.4475806451612903, 0.348, 0.3373493975903614, 0.23790322580645162, 0.25, 0.17670682730923695, 0.13725490196078433, 0.14112903225806453, 0.1450980392156863, 0.13274336283185842], "fmt": "pct", "max": 1, "xlabel": "grid position"}}, {"h": "Explore: circuits", "say": "How tightly does the grid order predict the finishing order? Averaged over races, the rank correlation is 0.87 at Monte Carlo and 0.65 at Zandvoort. <b>Doubt:</b> each circuit has only 5 to 14 races, and one wet race changes its number. Treat this chart as a description, and wait to see whether the model agrees.", "viz": {"kind": "hbars", "title": "Rank correlation between grid and finish (classified cars)", "rows": [{"name": "Monte Carlo", "value": 0.866, "label": "0.87", "cls": "hi"}, {"name": "Montmeló", "value": 0.8428, "label": "0.84", "cls": ""}, {"name": "Suzuka", "value": 0.8426, "label": "0.84", "cls": ""}, {"name": "Mexico City", "value": 0.8269, "label": "0.83", "cls": ""}, {"name": "Jeddah", "value": 0.8215, "label": "0.82", "cls": "hi"}, {"name": "Shanghai", "value": 0.7961, "label": "0.80", "cls": ""}, {"name": "Sakhir", "value": 0.7128, "label": "0.71", "cls": ""}, {"name": "Baku", "value": 0.6976, "label": "0.70", "cls": "hi"}, {"name": "São Paulo", "value": 0.6842, "label": "0.68", "cls": ""}, {"name": "Sochi", "value": 0.6694, "label": "0.67", "cls": ""}, {"name": "Zandvoort", "value": 0.6518, "label": "0.65", "cls": ""}], "min": 0.5, "max": 0.9, "xlabel": "six highest and five lowest · orange = street circuit"}}, {"h": "Split by season", "say": "Cars in the same race are not independent: if one retires, another gains a place. So whole seasons are held out. Form features (points over the previous five races) are shifted by one race, so today's result can never leak into today's prediction.", "code": "g = df.groupby(\"driverId\")[\"points\"]\ndf[\"driver_form\"] = g.transform(lambda s: s.shift(1).rolling(5, min_periods=1).mean())", "viz": {"kind": "split", "title": "Twelve seasons, cut by year", "train": {"label": "2014 to 2022", "n": 3681, "sub": "starts"}, "test": {"label": "2023 to 2025", "n": 1388, "sub": "starts"}, "note": "Honest surprise: here the random split scored slightly <i>lower</i> (0.856) than the season split. Leakage does not always flatter. You check because you cannot know in advance."}}, {"h": "Models", "say": "The paddock rule (\"start top ten, finish top ten\") scores 0.786. Logistic regression on grid alone: 0.846. Add team and driver form: 0.872. Gradient boosting: 0.868, no better. On this evidence you would pick the readable logistic model. Keep watching.", "viz": {"kind": "hbars", "title": "ROC AUC on 2023 to 2025", "rows": [{"name": "Baseline: always the average rate", "value": 0.5, "cls": "lo", "label": "0.500"}, {"name": "Rule of thumb: top-10 start", "value": 0.7860257475083056, "cls": "", "label": "0.786"}, {"name": "Logistic regression, grid only", "value": 0.8460350913621264, "cls": "", "label": "0.846"}, {"name": "Logistic regression, all features", "value": 0.8716414036544851, "cls": "hi", "label": "0.872"}, {"name": "Gradient boosting, all features", "value": 0.8679163205980066, "cls": "", "label": "0.868"}], "min": 0.45, "max": 0.9, "xlabel": "0.5 = chance · 1.0 = perfect"}}, {"h": "What the model relies on", "say": "Grid position, then team form, then a little driver form. The circuit features contribute <b>nothing measurable</b>. The circuit chart two steps ago was real description, but it does not help predict who scores. That is a finding, and it goes in the report.", "viz": {"kind": "hbars", "title": "Drop in AUC when a feature is shuffled", "rows": [{"name": "Grid position", "value": 0.21967550872093025}, {"name": "Team form (last 5 races)", "value": 0.03738081395348839}, {"name": "Driver form (last 5 races)", "value": 0.0061879152823920425}, {"name": "Pit-lane start", "value": 0.0009983388704319196}, {"name": "Street or permanent", "value": 1.5105897009948243e-05}, {"name": "Round of the season", "value": 0}, {"name": "Circuit: how much grid decides", "value": 0}], "digits": 3, "xlabel": "permutation importance on the test seasons"}}, {"h": "Decide: the price depends on the car", "say": "Split cars into front-runners (the top three teams on form) and everyone else. Starting 11th to 15th, a front-runner still scores points in 69% of starts. Everyone else: 29%. A grid place is worth far more to a midfield car.", "viz": {"kind": "group", "title": "% finishing in the points, by starting band", "labels": ["P1-5", "P6-10", "P11-15", "P16+"], "series": [{"name": "front-runners", "values": [0.8841158841158842, 0.7932098765432098, 0.69, 0.6041666666666666]}, {"name": "everyone else", "values": [0.8346456692913385, 0.6148867313915858, 0.2922134733158355, 0.11029411764705882]}], "max": 1}}, {"h": "The business answer", "say": "Now test the models on the decision itself: front-runners starting outside the top ten in 2023 to 2025 (70 starts). <b>66%</b> scored points. The logistic model said 52%; gradient boosting said 65%. Same AUC, different answer: only the model that can represent an interaction got it right. <b>Business answer:</b> a top team can take a tactical penalty for about 9.2 points; a midfield team cannot. <b>Limits:</b> cars out of position are not a random sample; 70 starts is a small check.", "viz": {"kind": "hbars", "title": "Front-runners starting 11th or lower: predicted vs actual % in the points", "rows": [{"name": "What actually happened", "value": 0.6571428571428571, "cls": "hi", "label": "66%"}, {"name": "Gradient boosting", "value": 0.6513873054760835, "label": "65%"}, {"name": "Logistic regression, all features", "value": 0.5234211026993429, "label": "52%"}, {"name": "Logistic regression, grid only", "value": 0.27091972939549874, "label": "27%"}], "min": 0, "max": 1, "xlabel": "the overall score did not show which model was fit for this decision"}}]};
+const pct = (v, d = 0) => (v * 100).toFixed(d) + '%';
+const grow = fn => requestAnimationFrame(() => requestAnimationFrame(fn));
+const VIZ = {
+  text(st, v) { st.append(h('div', { class: 'big', html: v.text })); if (v.kv) st.append(h('div', { class: 'kv' }, ...v.kv.map(([b, s]) => h('div', {}, h('b', {}, b), h('span', {}, s))))); },
+  funnel(st, v) { const max = Math.max(...v.rows.map(r => r.rows)); st.append(h('h4', {}, v.title || 'Rows after each cleaning step'));
+    v.rows.forEach(r => { const i = h('i'); st.append(h('div', { class: 'fn' }, h('span', {}, r.label), h('div', { class: 'b' }, i, h('span', {}, r.rows.toLocaleString())), h('small', {}, r.note))); grow(() => i.style.width = (r.rows / max * 100) + '%'); }); if (v.note) st.append(h('div', { class: 'note warn', html: v.note })); },
+  bars(st, v) { const max = v.max || Math.max(...v.values) * 1.12; st.append(h('h4', {}, v.title)); const box = h('div', { class: 'vb' }), xs = h('div', { class: 'vx' });
+    v.values.forEach((val, k) => { const i = h('i'); box.append(h('div', { class: 'c' + ((v.hi || []).includes(k) ? ' hi' : '') }, h('em', {}, v.fmt === 'pct' ? pct(val) : (v.fmt === 'num1' ? val.toFixed(1) : String(val))), i)); xs.append(h('span', {}, v.labels[k])); grow(() => i.style.height = (val / max * 100) + '%'); });
+    st.append(box, xs, h('div', { class: 'cap' }, v.xlabel || '')); if (v.note) st.append(h('div', { class: 'note', html: v.note })); },
+  group(st, v) { const max = v.max || 1; st.append(h('h4', {}, v.title)); const box = h('div', { class: 'vb' }), xs = h('div', { class: 'vx' });
+    v.labels.forEach((lab, k) => { v.series.forEach((s, j) => { const i = h('i'); box.append(h('div', { class: 'c' + (j ? '' : ' s2') }, h('em', {}, pct(s.values[k])), i)); grow(() => i.style.height = (s.values[k] / max * 100) + '%'); }); box.append(h('div', { style: 'flex:0 0 10px' })); xs.append(h('span', {}, lab)); });
+    st.append(box, xs, h('div', { class: 'legend', style: 'justify-content:center' }, ...v.series.map((s, j) => h('span', {}, h('i', { style: `background:var(--${j ? 'blue' : 'orange'})` }), s.name)))); if (v.note) st.append(h('div', { class: 'note', html: v.note })); },
+  hbars(st, v) { const lo = v.min || 0, max = v.max || Math.max(...v.rows.map(r => r.value)); st.append(h('h4', {}, v.title));
+    v.rows.forEach(r => { const i = h('i'); st.append(h('div', { class: 'hb ' + (r.cls || '') }, h('span', {}, r.name), h('div', {}, i), h('b', {}, r.label ?? r.value.toFixed(v.digits ?? 3)))); grow(() => i.style.width = Math.max(1.5, (r.value - lo) / (max - lo) * 100) + '%'); });
+    st.append(h('div', { class: 'cap' }, v.xlabel || '')); if (v.note) st.append(h('div', { class: 'note', html: v.note })); },
+  split(st, v) { st.append(h('h4', {}, v.title)); const a = h('div', { style: 'background:var(--blue)' }, v.train.label), b = h('div', { style: 'background:var(--orange)' }, v.test.label); st.append(h('div', { class: 'sp' }, a, b));
+    grow(() => { a.style.flex = v.train.n; b.style.flex = v.test.n; });
+    st.append(h('div', { class: 'kv' }, h('div', {}, h('b', {}, v.train.n.toLocaleString()), h('span', {}, 'training rows · ' + v.train.sub)), h('div', {}, h('b', {}, v.test.n.toLocaleString()), h('span', {}, 'test rows · ' + v.test.sub)))); if (v.note) st.append(h('div', { class: 'note', html: v.note })); },
+  table(st, v) { st.append(h('h4', {}, v.title)); const t = h('table', { class: 't' }, h('tr', {}, ...v.cols.map(c => h('th', {}, c)))); v.rows.forEach(r => t.append(h('tr', {}, ...r.map((c, k) => h('td', { class: typeof c === 'string' && k === v.sign ? (c.startsWith('+') ? 'pos' : 'neg') : '' }, c))))); st.append(h('div', { class: 'scroll' }, t)); if (v.note) st.append(h('div', { class: 'note', html: v.note })); },
+  threshold(st, v) { const P = v.pos, N = v.neg, nb = P.length, tot = a => a.reduce((x, y) => x + y, 0), TP0 = tot(P), TN0 = tot(N);
+    const cv = h('canvas', { width: 760, height: 300 }), sl = h('input', { type: 'range', min: 0, max: nb, step: 1, value: Math.round((v.start ?? .5) * nb) }), cost = h('input', { type: 'number', min: 1, max: 50, step: 1, value: v.cost_fn ?? 5 }), kv = h('div', { class: 'kv' }), msg = h('div', { class: 'note' });
+    st.append(h('div', { class: 'th vz' }, h('h4', {}, v.title), cv, sl, h('label', {}, 'A missed ' + (v.pos_one || v.pos_word) + ' costs', cost, '× one ' + v.action_word), kv, msg));
+    const css = n => getComputedStyle(document.documentElement).getPropertyValue(n).trim();
+    function draw() { const k = +sl.value, t = k / nb, c = +cost.value || 1, tp = tot(P.slice(k)), fp = tot(N.slice(k)), fn = TP0 - tp, tn = TN0 - fp, x = cv.getContext('2d'), W = cv.width, H = cv.height, hh = H / 2 - 18, bw = W / nb;
+      x.clearRect(0, 0, W, H); const mN = Math.max(...N), mP = Math.max(...P);
+      [[N, mN, 0, '--blue', v.neg_word], [P, mP, H / 2 + 6, '--orange', v.pos_word]].forEach(([arr, m, y0, col, lab]) => { arr.forEach((n, i) => { x.globalAlpha = i >= k ? 1 : .28; x.fillStyle = css(col); const bh = n / m * hh; x.fillRect(i * bw + 1, y0 + hh - bh + 14, bw - 2, bh); }); x.globalAlpha = 1; x.fillStyle = css('--ink2'); x.font = '600 15px system-ui'; x.fillText(lab + ' (' + tot(arr).toLocaleString() + ')', W - 8 - x.measureText(lab + ' (' + tot(arr).toLocaleString() + ')').width, y0 + 16); });
+      x.strokeStyle = css('--ink'); x.lineWidth = 2.5; x.beginPath(); x.moveTo(k * bw, 0); x.lineTo(k * bw, H); x.stroke(); x.fillStyle = css('--ink'); x.font = '600 15px system-ui'; x.fillText('threshold ' + t.toFixed(2) + ' →  act', Math.min(W - 170, k * bw + 8), H / 2 + 4);
+      const prec = tp + fp ? tp / (tp + fp) : 0, rec = tp / TP0, total = c * fn + fp, none = c * TP0, all = TN0;
+      let best = 0, bc = Infinity; for (let j = 0; j <= nb; j++) { const cc = c * (TP0 - tot(P.slice(j))) + tot(N.slice(j)); if (cc < bc) { bc = cc; best = j; } }
+      kv.replaceChildren(...[[(tp + fp).toLocaleString(), 'flagged for action'], [tp.toLocaleString(), v.pos_word + ' caught'], [fn.toLocaleString(), v.pos_word + ' missed'], [fp.toLocaleString(), 'false alarms'], [pct(prec), 'precision: flagged that were right'], [pct(rec), 'recall: ' + v.pos_word + ' that were caught'], [Math.round(total).toLocaleString(), 'total cost (in ' + v.action_word + 's)']].map(([b, s]) => h('div', {}, h('b', {}, b), h('span', {}, s))));
+      msg.innerHTML = `Doing nothing would cost ${Math.round(none).toLocaleString()}; acting on everyone ${all.toLocaleString()}. At this cost ratio the cheapest threshold is <b>${(best / nb).toFixed(2)}</b> (cost ${Math.round(bc).toLocaleString()}). The slider moves in steps of 0.02, so this can differ slightly from the exact figure in the paper. ${v.note || ''}`; }
+    sl.oninput = cost.oninput = draw; draw(); }
+};
+Lesson({ mount: '#S', title: STORY.steps_title || 'From question to decision', sub: 'Use Next, the dots, or Play.', pace: 6500,
+  steps: STORY.steps.map((s, i) => ({ say: `<b>${i + 1} · ${s.h}.</b> ${s.say}` + (s.code ? `<pre class="code" style="margin-top:10px">${s.code.split('\n').map(l => `<span class="l">${l.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/(#.*)$/, '<span class="c">$1</span>') || ' '}</span>`).join('')}</pre>` : ''), draw(r, st) { st.replaceChildren(); st.className = 'stage vz'; VIZ[s.viz.kind](st, s.viz); } })) });
+</script></body></html>
