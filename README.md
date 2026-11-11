@@ -7,7 +7,7 @@ The analysis covers 2014–2025 race starts and uses earlier team and driver per
 ## Project files
 
 - [Analysis notebook](portolio_project1_of_F1/f1_grid_to_points_analysis.ipynb)
-- [Interactive walkthrough](portolio_project1_of_F1/f1_grid_to_points_animation.html)
+- [Interactive walkthrough](f1_grid_to_points_animation.html)
 - [Original project notes](portolio_project1_of_F1/f1_grid_to_points_README.md)
 
 ## Headline result
