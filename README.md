@@ -1,13 +1,13 @@
 # F1 — Grid Position and Points Analysis
 
-A portfolio project investigating how Formula 1 starting-grid position relates to points finishes, and whether the cost of a grid penalty differs by car strength.
-
-The analysis covers 2014–2025 race starts and uses earlier team and driver performance as form features.
+A portfolio project investigating how Formula 1 starting-grid position relates to points finishes, and whether the cost of a grid penalty differs by car strength. The analysis covers 2014–2025 race starts and uses earlier team and driver performance as form features.
 
 ## Project files
 
 - [Analysis notebook](f1_grid_to_points_analysis.ipynb)
 - [Interactive walkthrough](https://awadhi-sadi-shemliwa.github.io/F1/f1_grid_to_points_animation.html)
+- [Project video: The Price of a Place](https://awadhi-sadi-shemliwa.github.io/F1/f1-price-of-a-place_hq.html)
+- [MP4 video file](f1-price-of-a-place_hq.mp4)
 - [Original project notes](f1_grid_to_points_README.md)
 
 ## Headline result
@@ -20,4 +20,4 @@ The analysis uses F1DB race data, licensed CC BY 4.0. Its conclusions describe t
 
 ## Reproduction note
 
-This starter repository contains the supplied notebook, HTML walkthrough, and project notes. Reproducing the analysis may also require the data-download script, dataset files, dependencies, and generated results and figures.
+This repository includes the supplied notebook, HTML walkthrough, project video, and project notes. Reproducing the analysis may also require the data-download script, dataset files, dependencies, and generated results and figures.
