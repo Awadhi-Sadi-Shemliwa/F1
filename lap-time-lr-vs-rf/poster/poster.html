@@ -1,0 +1,239 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>F1 Lap Time Poster</title>
+<style>
+  @page { size: 1189mm 841mm; margin: 0; }
+  :root{
+    --ink:#0b0b0b; --ink2:#3f3e3a; --muted:#77756f; --rule:#d9d7d0; --paper:#ffffff; --panel:#f6f5f1;
+    --lr:#2a78d6; --rf:#eb6834; --head:#16161d; --accent:#e10600;
+  }
+  *{ box-sizing:border-box; }
+  html,body{ margin:0; background:var(--paper); }
+  body{ width:1189mm; height:841mm; font-family:"Helvetica Neue", Arial, "DejaVu Sans", sans-serif; color:var(--ink);
+        font-size:26.5px; line-height:1.33; overflow:hidden; }
+  header{ background:var(--head); color:#fff; padding:13mm 16mm 10mm; display:flex; justify-content:space-between; align-items:flex-end;
+          border-bottom:3mm solid var(--accent); }
+  header h1{ margin:0; font-size:66px; line-height:1.08; letter-spacing:-0.5px; max-width:880mm; }
+  header h1 .lr{ color:#7fb3f0 } header h1 .rf{ color:#f59a72 }
+  header .sub{ margin-top:4mm; font-size:31px; color:#c9c8c2; }
+  header .who{ text-align:right; font-size:28px; color:#e6e5e0; line-height:1.45; }
+  header .who b{ color:#fff; font-size:34px; }
+  main{ display:grid; grid-template-columns: 1fr 1fr 1.04fr 1.04fr; gap:9mm; padding:8mm 14mm 0; height:668mm; }
+  .col{ display:flex; flex-direction:column; gap:5.5mm; min-height:0; }
+  section{ background:var(--paper); }
+  h2{ font-size:37px; margin:0 0 2.4mm; padding-bottom:1.6mm; border-bottom:2.5px solid var(--ink); display:flex; gap:3mm; align-items:baseline;}
+  h2 .n{ color:var(--accent); }
+  h3{ font-size:28px; margin:2.5mm 0 1mm; }
+  p{ margin:0 0 1.8mm; }
+  ul{ margin:0 0 1.8mm; padding-left:6mm; } li{ margin-bottom:0.9mm; }
+  img{ width:100%; display:block; }
+  .cap{ font-size:21px; color:var(--ink2); margin:1mm 0 2mm; font-style:italic; }
+  table{ border-collapse:collapse; width:100%; font-size:23.5px; margin:1.5mm 0 2mm; }
+  th,td{ padding:1.3mm 2mm; border-bottom:1px solid var(--rule); text-align:right; }
+  th:first-child, td:first-child{ text-align:left; }
+  thead th{ border-bottom:2px solid var(--ink); font-weight:700; }
+  td.best{ font-weight:800; }
+  .lrc{ color:var(--lr); font-weight:700 } .rfc{ color:var(--rf); font-weight:700 }
+  .two{ display:grid; grid-template-columns:1fr 1fr; gap:4mm; }
+  .box{ background:var(--panel); padding:3mm 4mm; border-radius:2mm; }
+  .key{ border-left:5px solid var(--accent); background:#fbefee; padding:3mm 4mm; border-radius:0 2mm 2mm 0; }
+  .pro li::marker{ content:"✓  "; color:#1a8a4a; font-weight:700 }
+  .con li::marker{ content:"!  "; color:var(--accent); font-weight:800 }
+  .small{ font-size:23.5px; }
+  .eq{ font-family: "DejaVu Serif", Georgia, serif; font-size:25px; }
+  footer{ position:absolute; bottom:0; left:0; right:0; height:62mm; padding:3mm 14mm 4mm; border-top:2px solid var(--ink);
+          font-size:18px; line-height:1.3; color:var(--ink2); columns:2; column-gap:12mm; }
+  footer b{ color:var(--ink) }
+</style>
+</head>
+<body>
+<header>
+  <div>
+    <h1>Predicting F1 race lap times from tyre &amp; race state: <span class="lr">Linear Regression</span> vs <span class="rf">Random Forest Regression</span></h1>
+    <div class="sub">2023 Italian Grand Prix (Monza) · 862 clean laps from FastF1 · benchmarked against Todd et al. (2025, Imperial College &amp; Mercedes-AMG F1)</div>
+  </div>
+  <div class="who"><b>Awadhi Shemliwa</b><br>MSc Data Science · City St George's, University of London<br>INM431 Machine Learning</div>
+</header>
+
+<main>
+<!-- ============ COLUMN 1 ============ -->
+<div class="col">
+  <section>
+    <h2><span class="n">1</span>Introduction &amp; motivation</h2>
+    <p>Pit-stop strategy depends on knowing how fast a car <i>will</i> lap given its tyres, fuel load and position on track. We ask: <b>using only information known before a lap is driven, can we predict its lap time, and is a Random Forest more accurate than Multiple Linear Regression?</b></p>
+    <p>Linear Regression mirrors the additive lap-time model used in race simulation (base pace + tyre wear + fuel + car) [5]. Random Forest belongs to the tree-ensemble family of XGBoost, which Todd et al. [1] found to be the most accurate predictor of F1 tyre energy (RMSE 4.79 vs 7.92 for linear regression).</p>
+  </section>
+
+  <section>
+    <h2><span class="n">2</span>Data set &amp; preparation</h2>
+    <ul>
+      <li><b>Source:</b> <code>fastf1</code> v3.9, <code>session.laps</code> of the 2023 Italian GP race: 958 lap records, 20 drivers, 51 laps, Medium &amp; Hard tyres, no safety car. Precedent for FastF1 F1-strategy datasets: [2], [4].</li>
+      <li><b>Target:</b> <code>LapTime</code> in seconds.</li>
+      <li><b>Leakage control:</b> sector times, speed traps and <code>IsPersonalBest</code> are measured <i>during</i> the lap and were excluded.</li>
+      <li><b>Features (7):</b> TyreLife, Compound, LapNumber (fuel proxy, ≈2 kg burnt per lap), Team, and three engineered from timing: <b>StartPos</b> (position at lap start), <b>GapAhead</b> (interval to the car in front) and <b>InDRS</b> (gap &lt; 1 s).</li>
+    </ul>
+    <table>
+      <thead><tr><th>Cleaning step</th><th>Removed</th><th>Remaining</th></tr></thead>
+      <tbody>
+        <tr><td>No lap time (incl. every lap 1)</td><td>29</td><td>929</td></tr>
+        <tr><td>Pit-in / pit-out laps</td><td>51</td><td>878</td></tr>
+        <tr><td>Not green flag / inaccurate timing</td><td>0</td><td>878</td></tr>
+        <tr><td>Robust outliers (per-driver z<sub>MAD</sub> &gt; 3)</td><td>16</td><td><b>862</b></td></tr>
+      </tbody>
+    </table>
+    <p class="small">Median/MAD is used instead of mean/SD because it is not distorted by the outliers it detects. Removed laps were traffic, mistakes and leaders cruising at the end. Clean target: mean 86.92 s, SD 0.70 s, skew 0.20, so close to Gaussian.</p>
+    <img src="../figures/fig02_laptime_before_after.png" alt="Before and after cleaning">
+    <div class="cap">Fig 2. Raw laps include pit in/out laps of 105–114 s (left). The cleaned target (right) is close to Gaussian.</div>
+  </section>
+
+  <section>
+    <h2><span class="n">3</span>Exploratory analysis</h2>
+    <img src="../figures/fig03_laptime_vs_lap.png" alt="Lap time vs lap number">
+    <div class="cap">Fig 3. Fuel burn makes laps faster (−0.017 s/lap overall), but tyre wear produces a sawtooth: times rise during the Medium stint and drop at the stop. Both LapNumber and TyreLife are therefore needed.</div>
+  </section>
+</div>
+
+<!-- ============ COLUMN 2 ============ -->
+<div class="col">
+  <section>
+    <img src="../figures/fig04_tyre_degradation.png" alt="Tyre degradation">
+    <div class="cap">Fig 4. After fuel correction the Medium degrades ~25 % faster than the Hard (+0.044 vs +0.035 s/lap). This motivates a TyreLife × Compound term.</div>
+    <div class="two">
+      <div><img src="../figures/fig05_team_pace.png" alt="Team pace"><div class="cap">Fig 5. Car performance spans ≈1.2 s, more than a whole stint of tyre wear, so Team must be a feature.</div></div>
+      <div><img src="../figures/fig06_gap_ahead.png" alt="Gap ahead"><div class="cap">Fig 6. No clear DRS or dirty-air effect at Monza. The fast >20 s band is the leaders (car pace, not clean air).</div></div>
+    </div>
+    <p class="small">TyreLife and LapNumber correlate (r = 0.62) but both have VIF &lt; 3. StartPos overlaps Team (VIF 7.6): acceptable for prediction, but those coefficients are less reliable.</p>
+  </section>
+
+  <section>
+    <h2><span class="n">4</span>Methods</h2>
+    <h3 class="lrc">Multiple Linear Regression (LR)</h3>
+    <p>Fits <span class="eq">ŷ = w₀ + Σ w<sub>j</sub>x<sub>j</sub></span> by ordinary least squares, minimising Σ(y − ŷ)². The closed form <span class="eq">w = (XᵀX)⁻¹Xᵀy</span> is the maximum-likelihood solution under Gaussian noise [7]. Categorical variables are one-hot encoded and numeric ones standardised.</p>
+    <div class="two small">
+      <ul class="pro"><li>Interpretable: coefficients in seconds</li><li>Matches tyre/fuel physics [5]</li><li>Extrapolates along trends</li><li>Very fast</li></ul>
+      <ul class="con"><li>Assumes linear, additive effects</li><li>Sensitive to outliers &amp; collinearity</li><li>Interactions must be hand-crafted</li></ul>
+    </div>
+    <h3 class="rfc">Random Forest Regression (RF)</h3>
+    <p>An ensemble of CART trees, each grown on a bootstrap sample (bagging), with a random subset of features tried at each split to de-correlate the trees [6]. A tree predicts the mean lap time in its leaf and the forest averages all trees. Out-of-bag laps give a free validation error.</p>
+    <div class="two small">
+      <ul class="pro"><li>Learns non-linearity &amp; interactions</li><li>No scaling; robust to skew/outliers</li><li>Few hyper-parameters; OOB estimate</li></ul>
+      <ul class="con"><li><b>Cannot extrapolate</b> beyond the training target range</li><li>Less interpretable</li><li>≈70× slower to train here</li></ul>
+    </div>
+  </section>
+
+  <section>
+    <h2><span class="n">5</span>Hypotheses</h2>
+    <ol style="margin:0;padding-left:6mm">
+      <li>Both models will clearly beat a naive baseline (predicting the mean lap time: RMSE 0.709 s).</li>
+      <li>As in [1], the tree ensemble (RF) will achieve a lower test RMSE than LR.</li>
+      <li>Because trees cannot extrapolate, LR will forecast late-race laps (unseen tyre ages) better.</li>
+    </ol>
+  </section>
+
+  <section>
+    <h2><span class="n">6</span>Methodology</h2>
+    <ol style="margin:0;padding-left:6mm">
+      <li>75 : 25 train/test split (646 / 216 laps), stratified by compound; the test set is unseen until the end.</li>
+      <li>5-fold CV on the training set to select the LR structure and the RF hyper-parameters (grid of 60 combinations).</li>
+      <li>Metrics: <b>RMSE</b> (primary, as in [1]), MAE, R², plus fit and predict times.</li>
+      <li>Significance: Wilcoxon signed-rank test on paired test errors and a corrected resampled t-test over 5×3 repeated CV [9].</li>
+      <li><b>Forecast test:</b> train on laps 2–38, predict laps 39–51.</li>
+    </ol>
+  </section>
+</div>
+
+<!-- ============ COLUMN 3 ============ -->
+<div class="col">
+  <section>
+    <h2><span class="n">7</span>Parameter selection &amp; experimental results</h2>
+    <div class="two">
+      <div><img src="../figures/fig08_lr_complexity.png" alt="LR complexity"></div>
+      <div class="small"><b class="lrc">LR:</b> M1 main effects · M2 + TyreLife×Compound · M3 + TyreLife×Team · M4 2nd-order polynomial. Training error falls (0.372 → 0.338 s) but validation barely moves (0.380 → 0.367 s): the bias–variance trade-off. All four lie within one standard error, so by the one-SE rule [8] we choose the simple, physically meaningful <b>M2</b>.</div>
+    </div>
+    <div class="cap">Fig 8. LR training vs 5-fold validation RMSE (error bars = fold SD).</div>
+    <img src="../figures/fig09_rf_tuning.png" alt="RF tuning">
+    <div class="cap">Fig 9. <b class="rfc">RF:</b> min_samples_leaf dominates (0.325 → 0.448 s from 1 to 16) and max_features matters little. OOB error plateaus after ≈200 trees. Final model: 500 trees, max_features = 0.33, leaf = 1, unlimited depth.</div>
+    <table>
+      <thead><tr><th>Unseen test set (216 laps)</th><th class="lrc">Linear Reg.</th><th class="rfc">Random Forest</th></tr></thead>
+      <tbody>
+        <tr><td>CV train (resubstitution) RMSE</td><td>0.371</td><td>0.126</td></tr>
+        <tr><td>CV validation RMSE</td><td>0.379</td><td class="best">0.327</td></tr>
+        <tr><td>Out-of-bag RMSE</td><td>–</td><td>0.330</td></tr>
+        <tr><td><b>Test RMSE (s)</b></td><td>0.378</td><td class="best">0.301</td></tr>
+        <tr><td>Test MAE (s)</td><td>0.284</td><td class="best">0.218</td></tr>
+        <tr><td>Test R²</td><td>0.715</td><td class="best">0.819</td></tr>
+        <tr><td>Fit / predict time (s)</td><td class="best">0.009 / 0.004</td><td>0.62 / 0.11</td></tr>
+      </tbody>
+    </table>
+    <img src="../figures/fig10_pred_vs_actual.png" alt="Predicted vs actual">
+    <div class="cap">Fig 10. RF tracks the diagonal more closely. LR predictions are compressed towards the mean (high bias). Both under-predict the slowest laps (traffic and mistakes, which no feature describes).</div>
+  </section>
+
+  <section>
+    <img src="../figures/fig11_residuals.png" alt="Residuals">
+    <div class="cap">Fig 11. LR residuals show no funnel (constant variance) but a fat right tail on the Q–Q plot. The RF error distribution is narrower (SD 0.300 vs 0.377 s).</div>
+  </section>
+  <section class="key">
+    <b>RF is 20 % more accurate on the random hold-out</b> (Wilcoxon p = 2.9×10⁻⁷; corrected repeated-CV t = 5.93, p = 3.7×10⁻⁵; closer on 63 % of laps). <b>Hypotheses 1 and 2 are confirmed.</b> LR residuals are right-skewed (Shapiro–Wilk p &lt; 10⁻⁵): a driver can lose time but cannot go faster than the car.
+  </section>
+</div>
+
+<!-- ============ COLUMN 4 ============ -->
+<div class="col">
+  <section>
+    <h2><span class="n">8</span>Analysis &amp; critical evaluation</h2>
+    <p><b>Interpolation is not forecasting.</b> A random split lets the model see laps 10 and 12 and predict lap 11. Strategy needs the next 10 laps. Trained on laps 2–38, <b>23 % of the forecast laps have a tyre age never seen</b> in training.</p>
+    <img src="../figures/fig13_forward_forecast.png" alt="Forecast">
+    <div class="cap">Fig 13. In the grey forecast area RF can only reuse lap times it has seen, so it stops rising beyond the largest training tyre age, while LR continues the degradation trend. Both miss Sainz's late podium fight.</div>
+    <table>
+      <thead><tr><th>Forecast laps 39–51 (212 laps)</th><th>RMSE (s)</th><th>R²</th></tr></thead>
+      <tbody>
+        <tr><td class="lrc">Linear Regression (M2)</td><td class="best">0.449</td><td class="best">0.42</td></tr>
+        <tr><td class="rfc">Random Forest</td><td>0.528</td><td>0.20</td></tr>
+        <tr><td>LR M4 polynomial (the CV winner)</td><td>0.523</td><td>–</td></tr>
+        <tr><td>Hybrid: LR + RF on residuals [4]</td><td class="best">0.447</td><td>–</td></tr>
+      </tbody>
+    </table>
+    <p class="small">The ranking <b>reverses</b>: LR is 15 % better (<b>hypothesis 3 confirmed</b>). Random-fold CV rewarded flexibility that fails out of range, and the one-SE rule protected the choice of LR. The hybrid is best on both tests (0.291 s hold-out, 0.447 s forecast).</p>
+    <div class="two">
+      <div><img src="../figures/fig15_benchmark.png" alt="Benchmark"><div class="cap">Fig 15. Same direction as Todd et al. [1] on the hold-out (−20 % vs −40 %), reversed when forecasting. Our gain is smaller: 7 lap-level features vs high-frequency telemetry, bagging vs boosting, and near-additive Monza physics.</div></div>
+      <div><img src="../figures/fig12_importance.png" alt="Importance"><div class="cap">Fig 12. LR relies on fuel and tyre age. RF also uses position, team and compound through interactions. InDRS is ≈0 for both.</div></div>
+    </div>
+
+  </section>
+
+  <section>
+    <h2><span class="n">9</span>Prediction with the chosen model</h2>
+    <img src="../figures/fig14_prediction_scenario.png" alt="Prediction scenario">
+    <div class="cap">Fig 14. A Ferrari running P4, 2.5 s behind the car ahead, on lap 30: predicted lap time by tyre age. LR draws straight degradation lines; RF draws a stepped curve with the Hard ≈0.2–0.35 s faster at every age.</div>
+    <p class="small"><b>Insight from the M2 coefficients:</b> each lap of tyre age costs <b>+0.068 s (Hard) / +0.080 s (Medium)</b>; each lap of fuel burnt saves <b>−0.038 s</b>. The Medium starts 0.075 s faster but is slower after ≈7 laps. RF predicts the Hard as faster at every age for a Ferrari on lap 30, consistent with the Medium → Hard one-stop most teams used.</p>
+  </section>
+
+  <section>
+    <h2><span class="n">10</span>Lessons learned &amp; future work</h2>
+    <ul class="small">
+      <li><b>Which is better?</b> RF for accuracy within the data (interpolation); LR for forecasting and interpretability. The two are complementary.</li>
+      <li>Leakage control and a validation design that matches the use case mattered more than the choice of algorithm.</li>
+      <li><b>Future work:</b> all dry 2022–24 races with tests on unseen circuits, as in [1]; per-lap telemetry and track temperature; GroupKFold by driver or race; XGBoost; Monte-Carlo strategy simulation [5].</li>
+    </ul>
+  </section>
+</div>
+</main>
+
+<footer>
+  <b>References.</b>
+  [1] J. Todd, J. Jiang, A. Russo, S. Winkler, S. Sale, J. McMillan, A. Rago, “Explainable Time Series Prediction of Tyre Energy in Formula One Race Strategy,” Proc. ACM SAC ’25, 2025, doi:10.1145/3672608.3707765.
+  [2] Nova SBE, “From Data to Podium: Analytical Approaches to Understanding and Predicting Driver &amp; Strategic Decisions in Formula 1,” MSc Business Analytics Work Project, 2023, run.unl.pt/bitstream/10362/176923.
+  [3] J. G. R. de Faria, F. G. Ferreira, “Podium and Influence: A Network Analysis of the Most Important Formula One Drivers,” Proc. BraSNAM, pp. 144–157, 2024, doi:10.5753/brasnam.2024.3054.
+  [4] M. P. O. Pereira, C. H. G. Ferreira, A. M. de Sousa, “Residual Hybrid Learning for Data-Limited Formula 1 Lap Time Prediction Across Multiple Circuits,” Proc. KDMiLe, pp. 201–208, 2026, doi:10.5753/kdmile.2026.32096.
+  [5] A. Heilmeier, M. Graf, J. Betz, M. Lienkamp, “Application of Monte Carlo Methods to Consider Probabilistic Effects in a Race Simulation for Circuit Motorsport,” Applied Sciences 10(12):4229, 2020.
+  [6] L. Breiman, “Random Forests,” Machine Learning 45:5–32, 2001.
+  [7] C. M. Bishop, Pattern Recognition and Machine Learning, Springer, 2006, Ch. 3.
+  [8] T. Hastie, R. Tibshirani, J. Friedman, The Elements of Statistical Learning, 2nd ed., Springer, 2009, §7.10.
+  [9] C. Nadeau, Y. Bengio, “Inference for the Generalization Error,” Machine Learning 52:239–281, 2003.
+  [10] P. Schaefer et al., FastF1 (v3.9), docs.fastf1.dev. Data: Formula 1 live-timing via FastF1; unofficial, for academic use.
+</footer>
+</body>
+</html>
