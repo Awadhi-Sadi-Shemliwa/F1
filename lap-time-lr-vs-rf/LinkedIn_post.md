@@ -1,7 +1,7 @@
 # LinkedIn post: F1 Lap-Time Lab
 
 **Attach:** `video/F1_PowerBI_walkthrough.mp4` (2 min 7 s, 1080p).
-**Replace** `[GitHub link]` with the URL of your F1 repo before posting.
+**GitHub link** (already in the post): https://github.com/Awadhi-Sadi-Shemliwa/F1/tree/main/lap-time-lr-vs-rf
 
 ---
 
@@ -32,6 +32,6 @@ To keep it fair, every lap was predicted by a model that had never seen that lap
 • hover any lap to see the real vs predicted time
 • play a what-if: a Ferrari on lap 30, Medium vs Hard tyres
 
-Built with Python (FastF1, scikit-learn) and Power BI. The full notebook, poster, data and dashboard guide are on GitHub: [GitHub link]
+Built with Python (FastF1, scikit-learn) and Power BI. The full notebook, poster, data and dashboard guide are on GitHub: https://github.com/Awadhi-Sadi-Shemliwa/F1/tree/main/lap-time-lr-vs-rf
 
 #Formula1 #F1 #MachineLearning #DataScience #PowerBI #Python #DataVisualization #RandomForest #LinearRegression #ItalianGP
